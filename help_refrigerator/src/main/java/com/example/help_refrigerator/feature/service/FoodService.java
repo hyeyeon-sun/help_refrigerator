@@ -9,8 +9,13 @@ import com.example.help_refrigerator.feature.persistance.FoodCategoryRepo;
 import com.example.help_refrigerator.feature.persistance.FoodRepo;
 import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -94,30 +99,47 @@ public class FoodService {
 
     public GetFoodDto addFood (PostFoodDto dto){
 
-        FoodCategory category = foodCategoryRepo.findById(1).orElseThrow();
+        try{
+            FoodCategory category = foodCategoryRepo.findById(1).orElseThrow();
 
-        Food food = Food.builder()
-                .CategoryId(category)
-                .name("어플리케이션 서버 생성 이름")
-                .expirationDate(new Date())
-                .imageUrl(dto.getImage_url())
-                .created_at(new Date())
-                .build();
+            RestTemplate restTemplate = new RestTemplate();
 
-        foodRepo.save(food);
+            final String baseUrl = "http://18.235.250.72:8080/test/api/food/1";
+            URI uri = new URI(baseUrl);
 
-        Food result = foodRepo.findByImageUrl(dto.getImage_url()).orElseThrow();
+            ResponseEntity<String> APIresult = restTemplate.getForEntity(uri, String.class);
 
-        GetFoodDto resultDto = GetFoodDto.builder()
-                .foodId(result.getFoodId())
-                .categoryId(result.getCategoryId())
-                .name(result.getName())
-                .expiration_date(result.getExpirationDate())
-                .image_url(result.getImageUrl())
-                .created_at(result.getCreated_at())
-                .build();
+            //APIresult.getBody();
 
-        return resultDto;
+            JSONObject jObject = new JSONObject(APIresult.getBody());
+            String name = jObject.getString("name");
+
+            Food food = Food.builder()
+                    .CategoryId(category)
+                    .name("어플리케이션 서버 생성 이름")
+                    .expirationDate(new Date())
+                    .imageUrl(dto.getImage_url())
+                    .created_at(new Date())
+                    .build();
+
+            foodRepo.save(food);
+
+            Food result = foodRepo.findByImageUrl(dto.getImage_url()).orElseThrow();
+
+            GetFoodDto resultDto = GetFoodDto.builder()
+                    .foodId(result.getFoodId())
+                    .categoryId(result.getCategoryId())
+                    .name(result.getName())
+                    .expiration_date(result.getExpirationDate())
+                    .image_url(result.getImageUrl())
+                    .created_at(result.getCreated_at())
+                    .build();
+
+            return resultDto;
+
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public GetFoodDto addFoodByManual(PostFoodManualDto dto) {
