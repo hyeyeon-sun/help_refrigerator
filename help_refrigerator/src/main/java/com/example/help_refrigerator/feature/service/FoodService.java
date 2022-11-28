@@ -5,6 +5,7 @@ import com.example.help_refrigerator.feature.domain.FoodCategory;
 import com.example.help_refrigerator.feature.dto.GetFoodDto;
 import com.example.help_refrigerator.feature.dto.PostFoodDto;
 import com.example.help_refrigerator.feature.dto.PostFoodManualDto;
+import com.example.help_refrigerator.feature.dto.PutFoodDto;
 import com.example.help_refrigerator.feature.persistance.FoodCategoryRepo;
 import com.example.help_refrigerator.feature.persistance.FoodRepo;
 import io.swagger.annotations.Authorization;
@@ -173,4 +174,22 @@ public class FoodService {
         foodRepo.deleteFoodByFoodId(id);
         return "성공입니다.";
     }
-}
+
+    public GetFoodDto modifyFood(PutFoodDto dto) {
+        Food food = foodRepo.findById(dto.getFood_id()).orElseThrow();
+        FoodCategory category = foodCategoryRepo.findById(dto.getFood_category_id()).orElseThrow();
+        food.setAll(dto.getFood_id(), category, dto.getName(), dto.getExpiration_date(), dto.getImage_url(), dto.getCreated_at());
+        foodRepo.save(food);
+
+        GetFoodDto resultDto = GetFoodDto.builder()
+                .categoryId(food.getCategoryId())
+                .foodId(food.getFoodId())
+                .name(dto.getName())
+                .expiration_date(dto.getExpiration_date())
+                .image_url(dto.getImage_url())
+                .created_at(dto.getCreated_at())
+                .build();
+
+        return resultDto;
+        }
+    }

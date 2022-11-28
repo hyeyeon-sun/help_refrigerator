@@ -3,6 +3,7 @@ package com.example.help_refrigerator.feature.controller;
 import com.example.help_refrigerator.feature.dto.GetFoodDto;
 import com.example.help_refrigerator.feature.dto.PostFoodDto;
 import com.example.help_refrigerator.feature.dto.PostFoodManualDto;
+import com.example.help_refrigerator.feature.dto.PutFoodDto;
 import com.example.help_refrigerator.feature.service.FoodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +41,9 @@ public class main {
         return foodService.addFood(dto);
     }
 
-    @PutMapping("/food/{foodId}")
-    public String modifyFoodById(){
-        return "modifyFoodById";
+    @PutMapping("/food")
+    public GetFoodDto modifyFoodById(@RequestBody PutFoodDto dto){
+        return foodService.modifyFood(dto);
     }
 
     @DeleteMapping("/food/{foodId}")
